@@ -6,18 +6,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import PA3.hashtable.SimpleHashFunction;
-import PA3.list.ArrayList;
 import PA3.map.Map;
 
 
-public class HuffmanCoding<K, V> {
+public class HuffmanCoding {
 
 	public static String input;
 	public static String output;
 	public static Map<String, Integer> map;
 	public static BTNode<String, Integer> root;
-	public static HashTableSC<String, Integer> tree;
+	public static HashTableSC<String, String> tree;
 	public static int currentSize;
+	
 
 	public HuffmanCoding(String path) throws IOException {
 		HuffmanCoding.input = load_data("./inputData/input2.txt");
@@ -28,13 +28,10 @@ public class HuffmanCoding<K, V> {
 	}
 
 	public static void main(String[] args) throws IOException{
-		input = load_data("./inputData/input2.txt");
-		map = HuffmanCoding.compute_fd(input);
-		root = huffman_tree(map);
-		tree = huffman_code(root);
-		output = encode(tree, input);
+		@SuppressWarnings("unused")
+		HuffmanCoding code = new HuffmanCoding("./inputData/input2.txt");
 		process_results(map, tree, input, output);
-
+		
 	}
 
 
@@ -78,9 +75,6 @@ public class HuffmanCoding<K, V> {
 		for(String e : map.getKeys()) {
 			sortedList.add(new BTNode<String, Integer>(e, map.get(e)));
 		}
-		for(int i=0; i<sortedList.size(); i++) {
-			System.out.println(sortedList.get(i).getKey()+" "+sortedList.get(i).getValue());
-		}
 		int size = sortedList.size();
 		//from P3 specifications pseudocode:
 		for (int j = 1; j < size; j++) {
@@ -107,34 +101,41 @@ public class HuffmanCoding<K, V> {
 	 * the last character of the tree. Returns a key-value reference between the letter and the binary code.
 	 */
 
-	public static HashTableSC<String, Integer> huffman_code(BTNode<String, Integer> node){
-		HashTableSC<String, Integer> result = new HashTableSC<String,Integer>(1, new SimpleHashFunction<String>());
-		huffman_aux(node.getLeftChild(), "0", result);
-		huffman_aux(node.getRightChild(), "1", result);
+	public static HashTableSC<String, String> huffman_code(BTNode<String, Integer> node){
+		HashTableSC<String, String> result = new HashTableSC<String,String>(1, new SimpleHashFunction<String>());
+		huffman_aux(node, new StringBuilder(), result);
 		return result;
 	}
 
 	//Auxiliary method, goes into each node and adds 0 or 1 until it has reached the end
-	public static void huffman_aux(BTNode<String, Integer> node, String num, HashTableSC<String, Integer>result){
-		if(node == null) {
-			return;
+	public static void huffman_aux(BTNode<String, Integer> node, StringBuilder string, HashTableSC<String, String> result){
+		if(node != null) {
+			if(node.getLeft() == null && node.getRight()==null) {
+				result.put(node.getText(), string.toString());
+			}
+			
+			string.append("0");
+			huffman_aux(node.getLeftChild(), string, result);
+			string.deleteCharAt(string.length()-1);
+			
+			string.append("1");
+			huffman_aux(node.getRightChild(), string, result);
+			string.deleteCharAt(string.length()-1);
 		}
-		if(node.getLeft() == null && node.getRight()==null) {
-			result.put(node.getText(), Integer.parseInt(num));
-		}
-		huffman_aux(node.getLeftChild(), num.toString() + 0, result);
-		huffman_aux(node.getRightChild(), num.toString() + 1, result);
+		
 	}
 
 
-	/*
+	/**
+	 * 
+	 * 
 	 * Processes the table and deciphers the input String
 	 */
-	public static String encode(HashTableSC<String,Integer> table, String input) {
+	public static String encode(HashTableSC<String,String> table, String input) {
 		String result = "";
-		for(String entry : input.split("")) {
-			for(String key: table.getKeys()) {
-				if(entry.equals(key.split(":")[0])) {
+		for(String entry : input.split("")) { // splits each input character
+			for(String key: table.getKeys()) { 
+				if(entry.equals(key.split(":")[0])) { // gets first position in the keys of the table variable: ex. "A:4" returns A
 					result+=table.get(key);
 				}
 			}
@@ -142,31 +143,33 @@ public class HuffmanCoding<K, V> {
 		return result;
 	}
 
-	public static void process_results(Map<String, Integer> map, HashTableSC<String,Integer> table, String input, String output) {
+	
+	/**
+	 * This method processes all of the given parameters and returns an organized table of values of the given 
+	 * 
+	 * @param map = mapping of symbols with their frequencies
+	 * @param tree = hashtable with each symbol and their byte code
+	 * @param input = input string given from text file
+	 * @param output = output string from encode method
+	 */
+	public static void process_results(Map<String, Integer> map, HashTableSC<String, String> tree, String input, String output) {
 		System.out.println("Symbol\t" + "Frequency\t" + "Code");
 		System.out.println("-----\t" + "---------\t" + "----");
-		for (String entry : table.getKeys()) {
-			System.out.println(entry.split(":")[0] + "\t" + entry.split(":")[1] + "\t" + "\t" +  table.get(entry));
+		for (String entry : tree.getKeys()) {
+			System.out.println(entry.split(":")[0] + "\t" + entry.split(":")[1] + "\t" + "\t" +  tree.get(entry));
 		} 		
+	
+
 		System.out.println("Original string:");
 		System.out.println(input);
 		System.out.println("Encoded String:");
 		System.out.println(output);
-		System.out.println("The original string requires " +input.getBytes().length+ " bytes.");
-		System.out.println("The encoded string requires " +output.getBytes().length+ " bytes.");
-		System.out.println("Difference in space required is " +Math.floor(output.length()/input.getBytes().length*100)+ "%");
+		double inputBit = input.getBytes().length;
+		double outputBit = output.getBytes().length/8 + 1;
+		int diff = (int) ((1 - outputBit/inputBit) * 100);
+		System.out.println("The original string requires " +inputBit+ " bytes.");
+		System.out.println("The encoded string requires " +outputBit+ " bytes.");
+		System.out.println("Difference in space required is " + diff+ "%");
 	}
-
-	//helper method that sorted map into an arraylist with nodes
-	public static ArrayList<BTNode<String, Integer>> sort(Map<String, Integer> map){
-		ArrayList<BTNode<String ,Integer>> list = new ArrayList<BTNode<String ,Integer>>(1);
-		for(String e : map.getKeys()) {
-			int i;
-			for (i=0; i<list.size() && list.get(i).getValue().compareTo(map.get(e)) > 0; i++);
-			list.add(i, (new BTNode<String, Integer>(e, map.get(e))));
-		}
-		return list;
-	}
-
 
 }
