@@ -5,7 +5,7 @@ package PA3.list;
  *
  */
 public abstract class AbstractSortedList<E extends Comparable<? super E>> implements SortedList<E> {
-	protected int currentSize;
+	public int currentSize;
 
 	/* ABSTRACT METHODS */
 	
@@ -36,7 +36,7 @@ public abstract class AbstractSortedList<E extends Comparable<? super E>> implem
 
 	@Override
 	public int size() {
-		return currentSize;
+		return getCurrentSize();
 	}
 
 	@Override
@@ -48,6 +48,14 @@ public abstract class AbstractSortedList<E extends Comparable<? super E>> implem
 	public void clear() {
 		while (!isEmpty())
 			removeIndex(0);
+	}
+
+	public int getCurrentSize() {
+		return currentSize;
+	}
+
+	public void setCurrentSize(int currentSize) {
+		this.currentSize = currentSize;
 	}
 
 }

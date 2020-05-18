@@ -10,10 +10,10 @@ import PA3.utils.BinaryTreePrinter.PrintableNode;
  * @param <K> Generic type for the key of the values to be stored in the nodes
  * @param <V> Generic type for the values to be stored in the nodes
  */
-public class BTNode<K extends Comparable<? super K>, V extends Comparable<? super V>> implements PrintableNode {
-	private K key;
+public class BTNode<K extends Comparable<? super K>, V extends Comparable<? super V>> implements Comparable<BTNode<K, V>>, PrintableNode {
 	private V value;
 	private BTNode<K, V> leftChild, rightChild, parent;
+	private K key;
 
 	public BTNode() {
 		this(null, null, null);
@@ -81,6 +81,10 @@ public class BTNode<K extends Comparable<? super K>, V extends Comparable<? supe
 	@Override
 	public String getText() {
 		return key.toString() + ":" + value.toString();
+	}
+	@Override
+	public int compareTo(BTNode<K, V> entry) {
+		return getValue().compareTo(entry.getValue());
 	}
 
 

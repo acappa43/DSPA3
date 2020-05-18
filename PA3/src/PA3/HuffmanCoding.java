@@ -17,6 +17,7 @@ public class HuffmanCoding<K, V> {
 	public static Map<String, Integer> map;
 	public static BTNode<String, Integer> root;
 	public static HashTableSC<String, Integer> tree;
+	public static int currentSize;
 
 	public HuffmanCoding(String path) throws IOException {
 		HuffmanCoding.input = load_data("./inputData/input2.txt");
@@ -71,15 +72,23 @@ public class HuffmanCoding<K, V> {
 	 * next method below.
 	 */
 	public static BTNode<String ,Integer> huffman_tree(Map<String,Integer> map){
- 		ArrayList<BTNode<String, Integer>> sortedList = sort(map);
-		int i;
+		//sort method added to ArrayList with P2 code
+		SortedArrayList<BTNode<String, Integer>> sortedList = 
+				new SortedArrayList<BTNode<String, Integer>>(11);
+		for(String e : map.getKeys()) {
+			sortedList.add(new BTNode<String, Integer>(e, map.get(e)));
+		}
+		for(int i=0; i<sortedList.size(); i++) {
+			System.out.println(sortedList.get(i).getKey()+" "+sortedList.get(i).getValue());
+		}
 		int size = sortedList.size();
+		//from P3 specifications pseudocode:
 		for (int j = 1; j < size; j++) {
 			BTNode<String, Integer> newNode = new BTNode<String, Integer>();
-			BTNode<String, Integer> x = sortedList.last();
-			sortedList.remove(x);
-			BTNode<String, Integer> y = sortedList.last();
-			sortedList.remove(y);
+			BTNode<String, Integer> x = sortedList.get(sortedList.currentSize-1);
+			sortedList.removeIndex(sortedList.currentSize-1);
+			BTNode<String, Integer> y = sortedList.get(sortedList.currentSize-1);
+			sortedList.removeIndex(sortedList.currentSize-1);
 			if(x.getValue()==y.getValue() && x.getKey().compareTo(y.getKey()) >0) {
 				newNode.setRightChild(x);
 				newNode.setLeftChild(y);
@@ -89,13 +98,9 @@ public class HuffmanCoding<K, V> {
 			}
 			newNode.setValue(x.getValue()+y.getValue());
 			newNode.setKey(newNode.getLeftChild().getKey()+newNode.getRightChild().getKey());
-			for (i=0; i<sortedList.size() && sortedList.get(i).getValue()
-					.compareTo(newNode.getValue()) > 0; i++);
-			sortedList.add(i, newNode);
-		}
-		return sortedList.first();
+			sortedList.add(newNode);
+		}return sortedList.get(0);
 	}
-
 	/*
 	 * Recursively goes into each node of the root: when traversing the right or left, we will add a value 
 	 * string of 0 or 1. We start by going into the left child which is the minimal, all the way into the rightest child,

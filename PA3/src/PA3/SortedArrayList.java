@@ -1,9 +1,8 @@
 package PA3;
-
 import PA3.list.AbstractSortedList;
 
 /**
- * @author YOUR NAME HERE
+ * @author Juan O. López
  *
  */
 public class SortedArrayList<E extends Comparable<? super E>> extends AbstractSortedList<E> {
@@ -18,13 +17,20 @@ public class SortedArrayList<E extends Comparable<? super E>> extends AbstractSo
 		elements = (E[]) new Comparable[initialCapacity]; // Cannot use Object here
 		currentSize = 0;
 	}
-
+	
 	@Override
 	public void add(E e) {
+		int i;
 		if (size() == elements.length)
 			reAllocate();
-		int index = getIndex(e); // Index where e should be added
-		/* TODO ADD CODE HERE */
+		//let's find index our way
+		for (i=0; i < size() && this.get(i).compareTo(e) > 0; i++);
+		//int index = getIndex(e); // Index where e should be added
+		/* Shift elements down to make room for new element */
+		for (int j = size(); j > i; j--)
+			elements[j] =  elements[j-1];
+		elements[i] = e;
+		currentSize++;
 	}
 	
 	/**
@@ -70,16 +76,21 @@ public class SortedArrayList<E extends Comparable<? super E>> extends AbstractSo
 		else
 			return binarySearch(e, first, mid-1);
 	}
-
-	/**************************************************************************
-	 * TODO Exercise 3
+	
+	/**************************
+	 * Exercise 3
 	 * 
 	 * Q: Could we also use binary search in SortedLinkedList?
 	 *    If you answered no, why not?
 	 *    If you answered yes, why didn't/shouldn't we do it?
 	 * 
-	 * A: ENTER YOUR ANSWER HERE (USE AS MANY LINES AS NECESSARY)
-	 * 
+	 * A: Yes, we can use it, but it's not a good idea.
+	 *    When using an array we have random access to the elements in O(1), so
+	 *    that we may quickly access any of the values at any index when performing
+	 *    the binary search algorithm.  This makes binary search run in O(log n).
+	 *    However, in a linked list we must traverse the list whenever we need to
+	 *    access a particular index, so binary search would take O(n log n), which
+	 *    is worse than doing a sequential search (which is O(n)).
 	 */
 	
 	@SuppressWarnings("unchecked")
@@ -101,8 +112,12 @@ public class SortedArrayList<E extends Comparable<? super E>> extends AbstractSo
 
 	@Override
 	public E removeIndex(int index) {
-		/* TODO ADD CODE HERE */
-		return null;
+		if (index < 0 || index >= size())
+			throw new IndexOutOfBoundsException();
+		/* Shift elements up to avoid gaps in the array */
+		for (int j = index; j < size() - 1; j++)
+			elements[j]  = elements[j + 1];
+		return (elements[--currentSize] = null);
 	}
 
 	@Override
@@ -127,4 +142,5 @@ public class SortedArrayList<E extends Comparable<? super E>> extends AbstractSo
 		System.arraycopy(elements, 0, asArray, 0, size());
 		return asArray;
 	}
+
 }

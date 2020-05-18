@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import PA3.hashtable.HashFunction;
 import PA3.list.*;
 import PA3.map.Map;
-import PA3.utils.Comparator;
 
 
 
@@ -92,6 +91,7 @@ public class HashTableSC<K, V> implements Map<K, V>{
 		currentSize++;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void rehash() {
 		List<BucketNode<K, V>>[] oldBuckets = this.buckets;
 		this.buckets = new LinkedList[buckets.length*2];

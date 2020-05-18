@@ -17,7 +17,7 @@ public class SortedArrayList<E extends Comparable<? super E>> extends AbstractSo
 		if (initialCapacity < 1)
 			throw new IllegalArgumentException("Capacity must be at least 1");
 		elements = (E[]) new Comparable[initialCapacity]; // Cannot use Object here
-		currentSize = 0;
+		setCurrentSize(0);
 	}
 
 	@Override
